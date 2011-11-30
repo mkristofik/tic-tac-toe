@@ -1,4 +1,5 @@
 import random
+import sys
 
 def printBoard(board):
     print " " + board[0] + " | " + board[1] + " | " + board[2]
@@ -13,7 +14,7 @@ ways_to_win = [[0,1,2], [3,4,5], [6,7,8],  # across
 
 def getWinner(board):
     for w in ways_to_win:
-        square = board[w[0]]  # pretend all squares will be the same
+        square = board[w[0]]  # pretend all three squares will be the same
         if all(board[i] == square for i in w):
             # if they really are, see who won
             if square == 'x':
@@ -32,15 +33,33 @@ def getOpenSquares(board):
 def isFull(board):
     return all(s != ' ' for s in board)
 
+def playerGoesFirst():
+    return len(sys.argv) <= 1 or sys.argv[1] != '2'
+
 
 legend = "123456789"
 printBoard(legend)
-print "\nEnter # of square:"
+
+player_char = 'x'
+comp_char = 'o'
+if playerGoesFirst():
+    print "\nEnter # of square:"
+else:
+    print "\nComputer goes first\n"
+    player_char, comp_char = comp_char, player_char
 
 board = [' '] * 9
 winner = 0
+first_move = True
 while not winner and not isFull(board):
     player_moved = False
+
+    # If human player is O's, skip first turn to let computer go first.
+    if first_move and player_char == 'o':
+        player_moved = True
+    first_move = False
+
+    # Player's turn
     while not player_moved:
         s = raw_input()
         if len(s) == 0:
@@ -56,17 +75,13 @@ while not winner and not isFull(board):
 
         # We've gotten past all illegal inputs and invalid moves.
         player_moved = True
-        board[c] = 'x'
-
-        # Did the player win?
+        board[c] = player_char
         winner = getWinner(board)
 
-    # If we get here, player moved but he didn't win, so computer gets a turn.
+    # Computer's turn
     if not winner and not isFull(board):
         i = random.choice(getOpenSquares(board))
-        board[i] = 'o'
-
-        # Did the computer win?
+        board[i] = comp_char
         winner = getWinner(board)
 
     # Either the game just ended or we're on to the next round.
