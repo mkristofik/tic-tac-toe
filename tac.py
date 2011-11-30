@@ -1,3 +1,5 @@
+import random
+
 def printBoard(board):
     print " " + board[0] + " | " + board[1] + " | " + board[2]
     print "---+---+---"
@@ -20,30 +22,57 @@ def getWinner(board):
                 return 2
     return 0
 
+def getOpenSquares(board):
+    open_squares = []
+    for i, s in enumerate(board):
+        if s == ' ':
+            open_squares.append(i)
+    return open_squares
+
+def isFull(board):
+    return all(s != ' ' for s in board)
+
 
 legend = "123456789"
 printBoard(legend)
 print "\nEnter # of square:"
 
-first_player = True
 board = [' '] * 9
-s = raw_input()
-while len(s) > 0:
-    if not s[0].isdigit():
-        continue
+winner = 0
+while not winner and not isFull(board):
+    player_moved = False
+    while not player_moved:
+        s = raw_input()
+        if len(s) == 0:
+            continue
+        if not s[0].isdigit():
+            continue
 
-    c = int(s[0]) - 1
-    if 0 <= c <= 8 and board[c] == ' ':
-        if first_player:
-            board[c] = 'x'
-        else:
-            board[c] = 'o'
-        first_player = not first_player
-        printBoard(board)  # only display a new board for a legal move
+        c = int(s[0]) - 1
+        if c < 0 or c > 8:
+            continue
+        if board[c] != ' ':
+            continue
 
-    w = getWinner(board)
-    if w > 0:
-        print "\nPlayer " + str(w) + " wins!"
-        break
+        # We've gotten past all illegal inputs and invalid moves.
+        player_moved = True
+        board[c] = 'x'
 
-    s = raw_input()
+        # Did the player win?
+        winner = getWinner(board)
+
+    # If we get here, player moved but he didn't win, so computer gets a turn.
+    if not winner and not isFull(board):
+        i = random.choice(getOpenSquares(board))
+        board[i] = 'o'
+
+        # Did the computer win?
+        winner = getWinner(board)
+
+    # Either the game just ended or we're on to the next round.
+    printBoard(board)
+
+if winner:
+    print "\nPlayer " + str(winner) + " wins!"
+else:
+    print "\nCat's game.  How boring."
