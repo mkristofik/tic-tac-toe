@@ -1,3 +1,4 @@
+import copy
 import random
 import sys
 
@@ -19,12 +20,10 @@ def getWinner(board):
     for w in ways_to_win:
         square = board[w[0]]  # pretend all three squares will be the same
         if all(board[i] == square for i in w):
-            # if they really are, see who won
-            if square == 'x':
-                return 1
-            elif square == 'o':
-                return 2
-    return 0
+            # if they really are, return who won
+            if square != ' ':
+                return square
+    return None
 
 def getOpenSquares(board):
     open_squares = []
@@ -35,6 +34,9 @@ def getOpenSquares(board):
 
 def isFull(board):
     return all(s != ' ' for s in board)
+
+def getOpposite(player):
+    return 'x' if player == 'o' else 'o'
 
 def playerGoesFirst():
     return len(sys.argv) <= 1 or sys.argv[1] != '2'
@@ -85,6 +87,40 @@ def tryToBeSmart(board):
     else:
         return playRandomly(board)
 
+# Recursively determine the best next move for the given player.  Return the
+# score and the board index of the move (chosen randomly if there are several
+# best moves).  The score is the likely outcome of the game on that line of
+# play: -1 for a loss, 0 for a draw, 1 for a win.
+# Source: http://en.wikipedia.org/wiki/Negamax.
+def negamax(board, player_to_move):
+    # You just lost.  That's the worst possible outcome.
+    if getWinner(board) == getOpposite(player_to_move):
+        return (-1, None)
+    # Cat's game, no move possible.
+    if isFull(board):
+        return (0, None)
+
+    # Make a pretend move in each legal square and see how it turns out.
+    best_score = -1
+    best_moves = []
+    for s in getOpenSquares(board):
+        new_board = copy.deepcopy(board)
+        new_board[s] = player_to_move
+        # Don't care what his best response move was, just score it.
+        score, _ = negamax(new_board, getOpposite(player_to_move))
+        # The score for you is the opposite of the score for the other player.
+        score *= -1
+        if score == 1:
+            # That move led to a win, so return it
+            return (1, s)
+        elif score > best_score:
+            best_score = score
+            best_moves = [s]
+        elif score == best_score:
+            best_moves.append(s)
+    assert best_moves
+    return (best_score, random.choice(best_moves))
+
 
 legend = "123456789"
 printBoard(legend)
@@ -127,14 +163,23 @@ while not winner and not isFull(board):
 
     # Computer's turn
     if not winner and not isFull(board):
-        i = tryToBeSmart(board)
-        board[i] = comp_char
+        # First move optimization
+        if all(square == ' ' for square in board):
+            # xkcd says optimal first move is in a corner
+            corner = random.choice((0, 2, 6, 8))
+            board[corner] = comp_char
+        else:
+            # Don't care what the score was, just take the best move.
+            _, move = negamax(board, comp_char)
+            assert move is not None
+            board[move] = comp_char
         winner = getWinner(board)
 
     # Either the game just ended or we're on to the next round.
     printBoard(board)
 
 if winner:
-    print "\nPlayer " + str(winner) + " wins!"
+    num = "1" if winner == 'x' else '2'
+    print "\nPlayer " + num + " wins!"
 else:
     print "\nCat's game.  How boring."
