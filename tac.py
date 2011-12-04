@@ -12,6 +12,9 @@ ways_to_win = [[0,1,2], [3,4,5], [6,7,8],  # across
                [0,3,6], [1,4,7], [2,5,8],  # down
                [0,4,8], [2,4,6]]           # diagonal
 
+player_char = 'x'
+comp_char = 'o'
+
 def getWinner(board):
     for w in ways_to_win:
         square = board[w[0]]  # pretend all three squares will be the same
@@ -36,12 +39,56 @@ def isFull(board):
 def playerGoesFirst():
     return len(sys.argv) <= 1 or sys.argv[1] != '2'
 
+# AI routines
+
+# Return the index of a random legal move.
+def playRandomly(board):
+    return random.choice(getOpenSquares(board))
+
+# Try to find an open square where 'player' has a move that will win the game.
+def chanceToWin(board, player):
+    for w in ways_to_win:
+        matches = 0
+        blank_square = -1
+        for square in w:
+            if board[square] == player:
+                matches += 1
+            elif board[square] == ' ':
+                blank_square = square
+        if matches == 2 and blank_square != -1:
+            return blank_square
+    return -1
+
+# Try to determine the best available move and return its index.
+def tryToBeSmart(board):
+    # If there's a move that will win you the game, take it.
+    winnable = chanceToWin(board, comp_char)
+    if winnable > -1:
+        return winnable
+    # If the player has a chance to win, block.
+    block = chanceToWin(board, player_char)
+    if block > -1:
+        return block
+
+    # I had this...
+        # If there's a move that will give you a chance to win, go there.
+    # ...but it actually made the computer play worse.
+
+    # If the center square is open, go there.
+    if board[4] == ' ':
+        return 4
+    # If a corner is open, choose one at random.
+    corners = [0, 2, 6, 8]
+    open_corners = [c for c in corners if board[c] == ' ']
+    if open_corners:
+        return random.choice(open_corners)
+    else:
+        return playRandomly(board)
+
 
 legend = "123456789"
 printBoard(legend)
 
-player_char = 'x'
-comp_char = 'o'
 if playerGoesFirst():
     print "\nEnter # of square:"
 else:
@@ -80,7 +127,7 @@ while not winner and not isFull(board):
 
     # Computer's turn
     if not winner and not isFull(board):
-        i = random.choice(getOpenSquares(board))
+        i = tryToBeSmart(board)
         board[i] = comp_char
         winner = getWinner(board)
 
