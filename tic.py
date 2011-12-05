@@ -28,8 +28,4 @@ while not winner and not rules.isFull(board):
     # Either the game just ended or we're on to the next round.
     rules.printBoard(board)
 
-if winner:
-    num = "1" if winner == 'x' else '2'
-    print "\nPlayer " + num + " wins!"
-else:
-    print "\nCat's game.  How boring."
+rules.printEndGame(winner)

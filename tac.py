@@ -35,8 +35,4 @@ while not winner and not rules.isFull(board):
     first_move = False
     rules.printBoard(board)
 
-if winner:
-    num = "1" if winner == 'x' else '2'
-    print "\nPlayer " + num + " wins!"
-else:
-    print "\nCat's game.  How boring."
+rules.printEndGame(winner)

@@ -68,3 +68,15 @@ def printBoard(board):
     print " " + board[3] + " | " + board[4] + " | " + board[5]
     print "---+---+---"
     print " " + board[6] + " | " + board[7] + " | " + board[8]
+
+def printEndGame(winner):
+    """Print an appropriate end-of-game message.
+
+    winner -- None, 'x', or 'o'
+
+    """
+    if winner:
+        num = "1" if winner == 'x' else '2'
+        print "\nPlayer " + num + " wins!"
+    else:
+        print "\nCat's game.  How boring."
