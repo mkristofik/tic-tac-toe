@@ -12,6 +12,24 @@ def firstMove():
     """
     return random.choice(rules.corners)
 
+def humanPlayer(board):
+    """Get the index of square chosen by a human player."""
+    while True:
+        s = raw_input()
+        if len(s) == 0:
+            continue
+        if not s[0].isdigit():
+            continue
+
+        c = int(s[0]) - 1
+        if c < 0 or c > 8:
+            continue
+        if board[c] != ' ':
+            continue
+
+        # We've gotten past all illegal inputs and invalid moves.
+        return c
+
 def negamax(board, player_to_move):
     """Use a variation of the Negamax algorithm to choose the next move.
 

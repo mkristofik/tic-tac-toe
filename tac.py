@@ -1,57 +1,28 @@
+"""Tic-tac-toe game where the computer player goes first."""
+
 import ai
-import random
 import rules
-import sys
 
-player_char = 'x'
-comp_char = 'o'
-
-def playerGoesFirst():
-    return len(sys.argv) <= 1 or sys.argv[1] != '2'
-
-legend = "123456789"
-rules.printBoard(legend)
-
-if playerGoesFirst():
-    print "\nEnter # of square:"
-else:
-    print "\nComputer goes first\n"
-    player_char, comp_char = comp_char, player_char
-
+player_char = 'o'
+comp_char = 'x'
 board = [' '] * 9
 winner = None
 first_move = True
+
+legend = "123456789"
+rules.printBoard(legend)
+print "\nComputer goes first\n"
+
 while not winner and not rules.isFull(board):
-    player_moved = False
-
-    # If human player is O's, skip first turn to let computer go first.
-    if first_move and player_char == 'o':
-        player_moved = True
-    first_move = False
-
-    # Player's turn
-    while not player_moved:
-        s = raw_input()
-        if len(s) == 0:
-            continue
-        if not s[0].isdigit():
-            continue
-
-        c = int(s[0]) - 1
-        if c < 0 or c > 8:
-            continue
-        if board[c] != ' ':
-            continue
-
-        # We've gotten past all illegal inputs and invalid moves.
-        player_moved = True
-        board[c] = player_char
+    # On the first turn, skip the human player to let the computer go first.
+    if not first_move:
+        # Player's turn
+        board[ai.humanPlayer(board)] = player_char
         winner = rules.getWinner(board)
 
     # Computer's turn
     if not winner and not rules.isFull(board):
-        # First move optimization
-        if all(square == ' ' for square in board):
+        if first_move:
             board[ai.firstMove()] = comp_char
         else:
             # Don't care what the score was, just take the best move.
@@ -61,6 +32,7 @@ while not winner and not rules.isFull(board):
         winner = rules.getWinner(board)
 
     # Either the game just ended or we're on to the next round.
+    first_move = False
     rules.printBoard(board)
 
 if winner:
