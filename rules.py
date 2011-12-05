@@ -1,14 +1,15 @@
 """Rules and common information for a tic-tac-toe game.
 
 The game board can be represented by any sequence with at least 9 elements.
+Squares are indexed starting at 0 in the upper left corner and ending with 8 in
+the lower right corner.
 
 """
 
+corners = (0, 2, 6, 8)
 ways_to_win = [[0,1,2], [3,4,5], [6,7,8],  # across
                [0,3,6], [1,4,7], [2,5,8],  # down
                [0,4,8], [2,4,6]]           # diagonal
-
-corners = (0, 2, 6, 8)
 
 def chanceToWin(board, player):
     """Can a player win on his next move?
